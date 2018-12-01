@@ -17,7 +17,7 @@ class CameraViewController: UIViewController {
     
     @IBOutlet weak var captureButton: UIButton!
     
-    let timeIntervalBeforeCaptureStart = 5
+    let timeIntervalBeforeCaptureStart = 1
     let timeIntervalToCapture = 1
 //    let timeIntervalBeforeCaptureStart = 1
 //    let timeIntervalToCapture = 1
@@ -602,30 +602,35 @@ class CameraViewController: UIViewController {
             //RHip - RKnee - RAnkle
             //LHip - LKnee - LAnkle
         
-        let rightHip: [Line] = linesInFrames[8];
-        let rightKnee: [Line] = linesInFrames[9];
-        let rightAnkle: [Line] = linesInFrames[10];
+        var angleSignal: [CGFloat] = [];
         
-        let leftHip: [Line] = linesInFrames[11];
-        let leftKnee: [Line] = linesInFrames[12];
-        let leftAnkle: [Line] = linesInFrames[13];
+        for frame in linesInFrames {
+            
+            var rightleg_angle: CGFloat = 0;
+            var leftleg_angle: CGFloat = 0;
+            
         
-        
-        //all of these arrays ^ will be the same size corresponding to # of frames
-        var rightHipSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightHip);
-        var rightKneeSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightKnee);
-        var rightAnkleSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightAnkle);
-
-        var leftHipSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftHip);
-        var leftKneeSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftKnee);
-        var leftAnkleSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftAnkle);
-        
-        
-        
-        
-        
-        
-        
+            if(frame.count >= 9) { //we must ensure that openpose actually found the segments in this frame, otherwise the
+                                    //app will crash
+                let RHip_to_RKnee: Line = frame[7];
+                let RKnee_to_RAnkle: Line = frame[8];
+                
+                let RHip_to_RKnee_slope = computeSlopeOfSegment(segment: RHip_to_RKnee);
+                let RKnee_to_RAnkle_slope = computeSlopeOfSegment(segment: RKnee_to_RAnkle);
+                rightleg_angle = computeAngleBetweenTwoSlopes(slope1: RHip_to_RKnee_slope, slope2: RKnee_to_RAnkle_slope);
+            }
+            
+            if (frame.count >= 11) { //for similar reasons as above, check length
+                let LHip_to_LKnee: Line = frame[10];
+                let LKnee_to_LAnkle: Line = frame[11];
+                
+                let LHip_to_LKnee_slope = computeSlopeOfSegment(segment: LHip_to_LKnee);
+                let LKnee_to_LAnkle_slope = computeSlopeOfSegment(segment: LKnee_to_LAnkle);
+                leftleg_angle = computeAngleBetweenTwoSlopes(slope1: LHip_to_LKnee_slope, slope2: LKnee_to_LAnkle_slope);
+            }
+            
+            angleSignal.append(rightleg_angle + leftleg_angle);
+        }
         
         
         
@@ -643,17 +648,6 @@ class CameraViewController: UIViewController {
         return angle;
     }
     
-    func computeSlopesForEntireSegment(segments: [Line]) -> [CGFloat] {
-        var slopes: [CGFloat] = []
-        
-        for segment in segments {
-            let slope: CGFloat = computeSlopeOfSegment(segment: segment);
-            slopes.append(slope);
-        }
-        
-        return slopes;
-    }
- 
     func computeSlopeOfSegment(segment: Line) -> CGFloat {
         
         let x1 = segment.start.x;
