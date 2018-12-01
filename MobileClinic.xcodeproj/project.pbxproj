@@ -12,7 +12,6 @@
 		0B3C900421A41CEE00DDC146 /* Activities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C900321A41CEE00DDC146 /* Activities.swift */; };
 		0B3C900821A41DC200DDC146 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C900721A41DC200DDC146 /* Session.swift */; };
 		0B3C900A21A4214B00DDC146 /* ActivityTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3C900921A4214B00DDC146 /* ActivityTableViewCell.swift */; };
-		9D05A44220074BF3005DE101 /* MobileOpenPose.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9D05A44120074BF3005DE101 /* MobileOpenPose.mlmodel */; };
 		BC2189EBCD4EA126322FF93B /* Pods_MobileClinic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11CC6C3D4B17C24B1D1133F9 /* Pods_MobileClinic.framework */; };
 		CA1155CF1FDE4CEE003E751E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155CE1FDE4CEE003E751E /* AppDelegate.swift */; };
 		CA1155D11FDE4CEE003E751E /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155D01FDE4CEE003E751E /* CameraViewController.swift */; };
@@ -21,6 +20,7 @@
 		CA1155D91FDE4CEE003E751E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA1155D71FDE4CEE003E751E /* LaunchScreen.storyboard */; };
 		CA1155E31FDE4D06003E751E /* OpenCVWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */; };
 		CA1155E51FDE4D77003E751E /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E41FDE4D77003E751E /* Common.swift */; };
+		F74323CD21AA1A8D001FD647 /* MobileOpenPose.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -57,6 +57,7 @@
 		CA1155E11FDE4D06003E751E /* OpenCVWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenCVWrapper.h; sourceTree = "<group>"; };
 		CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCVWrapper.mm; sourceTree = "<group>"; };
 		CA1155E41FDE4D77003E751E /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MobileOpenPose.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				9D05A44120074BF3005DE101 /* MobileOpenPose.mlmodel */,
+				F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */,
 				CA1155CE1FDE4CEE003E751E /* AppDelegate.swift */,
 				CA1155E11FDE4D06003E751E /* OpenCVWrapper.h */,
 				CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */,
@@ -234,6 +236,7 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-MobileClinic/Pods-MobileClinic-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/IteratorTools/IteratorTools.framework",
 				"${BUILT_PRODUCTS_DIR}/OpenCV/opencv2.framework",
+				"${BUILT_PRODUCTS_DIR}/Surge/Surge.framework",
 				"${BUILT_PRODUCTS_DIR}/Upsurge/Upsurge.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -242,6 +245,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IteratorTools.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/opencv2.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Surge.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Upsurge.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,11 +265,11 @@
 				0B3C900A21A4214B00DDC146 /* ActivityTableViewCell.swift in Sources */,
 				0B3C900021A3443800DDC146 /* ActivitiesViewController.swift in Sources */,
 				0B3C900221A3486600DDC146 /* TrialViewController.swift in Sources */,
-				9D05A44220074BF3005DE101 /* MobileOpenPose.mlmodel in Sources */,
 				CA1155D11FDE4CEE003E751E /* CameraViewController.swift in Sources */,
 				CA1155CF1FDE4CEE003E751E /* AppDelegate.swift in Sources */,
 				CA1155E31FDE4D06003E751E /* OpenCVWrapper.mm in Sources */,
 				0B3C900821A41DC200DDC146 /* Session.swift in Sources */,
+				F74323CD21AA1A8D001FD647 /* MobileOpenPose.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,7 +410,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = C785C9X8KV;
+				DEVELOPMENT_TEAM = H9K3EBE8A3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -433,7 +437,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = C785C9X8KV;
+				DEVELOPMENT_TEAM = H9K3EBE8A3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

@@ -2,6 +2,7 @@ import UIKit
 import AVFoundation
 import Vision
 import Photos
+import Surge
 
 let imageSize = 368
 
@@ -16,8 +17,8 @@ class CameraViewController: UIViewController {
     
     @IBOutlet weak var captureButton: UIButton!
     
-    let timeIntervalBeforeCaptureStart = 15
-    let timeIntervalToCapture = 30
+    let timeIntervalBeforeCaptureStart = 5
+    let timeIntervalToCapture = 1
 //    let timeIntervalBeforeCaptureStart = 1
 //    let timeIntervalToCapture = 1
 
@@ -568,9 +569,105 @@ class CameraViewController: UIViewController {
     }
 
     func calculateResult(linesInFrames: [[Line]]) -> (Int, String) {
+        
+        
+        /*
+         Common.swift
+         ___________________
+         enum CocoPart: Int {
+         case Nose = 0
+         case Neck = 1
+         case RShoulder = 2
+         case RElbow = 3
+         case RWrist = 4
+         case LShoulder = 5
+         case LElbow = 6
+         case LWrist = 7
+         case RHip = 8
+         case RKnee = 9
+         case RAnkle = 10
+         case LHip = 11
+         case LKnee = 12
+         case LAnkle = 13
+         case REye = 14
+         case LEye = 15
+         case REar = 16
+         case LEar = 17
+         case Background = 18
+         }
+ 
+        */
+        
+        //to calculate the angle that the leg is bending we can compute between:
+            //RHip - RKnee - RAnkle
+            //LHip - LKnee - LAnkle
+        
+        let rightHip: [Line] = linesInFrames[8];
+        let rightKnee: [Line] = linesInFrames[9];
+        let rightAnkle: [Line] = linesInFrames[10];
+        
+        let leftHip: [Line] = linesInFrames[11];
+        let leftKnee: [Line] = linesInFrames[12];
+        let leftAnkle: [Line] = linesInFrames[13];
+        
+        
+        //all of these arrays ^ will be the same size corresponding to # of frames
+        var rightHipSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightHip);
+        var rightKneeSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightKnee);
+        var rightAnkleSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: rightAnkle);
+
+        var leftHipSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftHip);
+        var leftKneeSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftKnee);
+        var leftAnkleSlopes: [CGFloat] = computeSlopesForEntireSegment(segments: leftAnkle);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         last_score += 10
         return (last_score, "Well done!")
     }
+    
+    func computeAngleBetweenTwoSlopes(slope1: CGFloat, slope2: CGFloat) -> CGFloat{
+        var temp_calc = (slope2 - slope1)/(1 + slope1*slope2)
+        
+        var angle_rad = CGFloat(Surge.atan(Double(temp_calc)))
+        
+        var angle = angle_rad * (180/CGFloat.pi)
+        
+        return angle;
+    }
+    
+    func computeSlopesForEntireSegment(segments: [Line]) -> [CGFloat] {
+        var slopes: [CGFloat] = []
+        
+        for segment in segments {
+            let slope: CGFloat = computeSlopeOfSegment(segment: segment);
+            slopes.append(slope);
+        }
+        
+        return slopes;
+    }
+ 
+    func computeSlopeOfSegment(segment: Line) -> CGFloat {
+        
+        let x1 = segment.start.x;
+        let y1 = segment.start.y;
+        
+        let x2 = segment.end.x;
+        let y2 = segment.end.y;
+        
+        let slope: CGFloat = (y2 - y1)/(x2-x1);
+        
+        return slope;
+    }
+    
+    
     
     func showAlert(title: String, message: String, btnText: String, completion: @escaping () -> Void = {}) {
         NSLog("showAlert \(title) \(message)")
