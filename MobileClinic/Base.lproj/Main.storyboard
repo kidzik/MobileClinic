@@ -13,7 +13,7 @@
         <!--Camera-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController title="Camera" id="BYZ-38-t0r" customClass="CameraViewController" customModule="BoneDetecter" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Camera" id="BYZ-38-t0r" customClass="CameraViewController" customModule="MobileClinic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -50,7 +50,7 @@
                                     <action selector="tappedCaptureButtonWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="egY-vz-GwK"/>
                                 </connections>
                             </button>
-                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MIg-bT-JiD" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MIg-bT-JiD" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="692" width="300" height="27"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="27" id="1sS-f0-Y6I"/>
@@ -60,7 +60,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Press button to start" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="zaW-pS-EVL" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Press button to start" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="zaW-pS-EVL" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="54" width="300" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="300" id="aC9-WL-7Ga"/>
@@ -120,21 +120,52 @@
                         <outlet property="progressLabel" destination="MIg-bT-JiD" id="WKI-IE-XLZ"/>
                         <outlet property="progressView" destination="uEu-v7-DmW" id="ykd-vA-f9X"/>
                         <segue destination="UUR-Qi-wO7" kind="show" identifier="Trial details" id="dIq-Zm-uJc"/>
+                        <segue destination="4lN-dh-Rf4" kind="show" identifier="See Graph" id="RGo-83-kbo"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="40.799999999999997" y="35.467980295566505"/>
         </scene>
+        <!--Angle Over Time-->
+        <scene sceneID="n6a-5t-IUd">
+            <objects>
+                <viewController title="Angle Over Time" id="4lN-dh-Rf4" customClass="GraphViewController" customModule="MobileClinic" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="HLq-Va-iXI">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rDe-in-hrV" customClass="LineChartView" customModule="Charts">
+                                <rect key="frame" x="0.0" y="124" width="375" height="565"/>
+                                <color key="backgroundColor" red="1" green="0.5409764051" blue="0.84731429820000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="rDe-in-hrV" firstAttribute="top" secondItem="PRY-Mb-ep0" secondAttribute="top" constant="80" id="IkC-sw-6pj"/>
+                            <constraint firstAttribute="trailing" secondItem="rDe-in-hrV" secondAttribute="trailing" id="JkL-x6-kPI"/>
+                            <constraint firstItem="rDe-in-hrV" firstAttribute="leading" secondItem="HLq-Va-iXI" secondAttribute="leading" id="OXl-fN-GgR"/>
+                            <constraint firstItem="rDe-in-hrV" firstAttribute="centerY" secondItem="HLq-Va-iXI" secondAttribute="centerY" id="tu7-eK-n9B"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="PRY-Mb-ep0"/>
+                    </view>
+                    <connections>
+                        <outlet property="chart" destination="rDe-in-hrV" id="U7M-9f-Pws"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="r0U-n4-i9K" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-420" y="852.70935960591135"/>
+        </scene>
         <!--Trial details-->
         <scene sceneID="SEl-tO-dAK">
             <objects>
-                <viewController title="Trial details" id="UUR-Qi-wO7" customClass="TrialViewController" customModule="BoneDetecter" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Trial details" id="UUR-Qi-wO7" customClass="TrialViewController" customModule="MobileClinic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ynU-r7-Zre">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your score" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Bgt-KI-ral" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your score" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Bgt-KI-ral" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="54" width="300" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="300" id="AtW-2N-PuW"/>
@@ -143,13 +174,13 @@
                                 <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="59/100" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="tCG-jt-39N" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="59/100" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="tCG-jt-39N" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="220" y="152" width="145" height="42"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="35"/>
                                 <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Well done!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="DVT-84-SZz" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Well done!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="DVT-84-SZz" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="220" y="204" width="145" height="42"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="35"/>
                                 <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -162,7 +193,7 @@
                                     <constraint firstAttribute="width" relation="lessThanOrEqual" constant="200" id="rIJ-Io-FGO"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your Statistics" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="kYj-ey-jJq" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Your Statistics" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="kYj-ey-jJq" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="304" width="300" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="300" id="3TO-WU-pFY"/>
@@ -237,7 +268,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sit-to-stand-test" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U51-cU-sh5" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sit-to-stand-test" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U51-cU-sh5" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="77.666666666666671" y="54" width="219.66666666666663" height="36"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
                                 <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -249,7 +280,7 @@
                                     <constraint firstAttribute="width" secondItem="je9-fK-MIp" secondAttribute="height" id="Iss-ss-aQ4"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aYz-tS-xDt" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aYz-tS-xDt" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="429.99999999999994" width="300" height="179.33333333333331"/>
                                 <string key="text">Repeat this simple exercise for 30 seconds every day. Record yourself and track the results!
 
@@ -302,12 +333,12 @@ Stand up and sit down until you hear the signal
         <!--Activities-->
         <scene sceneID="7Da-aW-U82">
             <objects>
-                <viewController title="Activities" id="ebr-Ug-nna" customClass="ActivitiesViewController" customModule="BoneDetecter" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Activities" id="ebr-Ug-nna" customClass="ActivitiesViewController" customModule="MobileClinic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="yHQ-bJ-B7M">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activities" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="i5o-hl-3sm" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activities" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="i5o-hl-3sm" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                 <rect key="frame" x="37.666666666666657" y="54" width="300" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="300" id="jRr-il-m2k"/>
@@ -337,7 +368,7 @@ Stand up and sit down until you hear the signal
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="sectionIndexBackgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" id="xBI-NZ-Tod" customClass="ActivityTableViewCell" customModule="BoneDetecter" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" id="xBI-NZ-Tod" customClass="ActivityTableViewCell" customModule="MobileClinic" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xBI-NZ-Tod" id="a90-8W-WDG">
@@ -351,13 +382,13 @@ Stand up and sit down until you hear the signal
                                                         <constraint firstAttribute="height" constant="1" id="Zip-09-l6J"/>
                                                     </constraints>
                                                 </view>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="nYN-Hs-KY7" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="nYN-Hs-KY7" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                                     <rect key="frame" x="20" y="7" width="51" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                     <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="soK-HE-Q1F" customClass="UILabelStroked" customModule="BoneDetecter" customModuleProvider="target">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="soK-HE-Q1F" customClass="UILabelStroked" customModule="MobileClinic" customModuleProvider="target">
                                                     <rect key="frame" x="292.66666666666669" y="7" width="62.333333333333314" height="30"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                                     <color key="textColor" red="0.016804177310000001" green="0.19835099580000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -11,5 +11,6 @@ target 'MobileClinic' do
   pod 'IteratorTools', '~> 1.1.0'
   pod 'OpenCV', '~> 3.3.1'
   pod 'Surge', '~> 2.0.0'
+  pod 'Charts'
 
 end

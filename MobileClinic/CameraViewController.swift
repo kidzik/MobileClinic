@@ -3,6 +3,8 @@ import AVFoundation
 import Vision
 import Photos
 import Surge
+import Charts
+
 
 let imageSize = 368
 
@@ -54,8 +56,12 @@ class CameraViewController: UIViewController {
     var canUseCamera: Bool?
     var canUsePhotoLibrary: Bool?
     
+    var angleSignal: [CGFloat] = [];
+
     fileprivate func openTrialView() {
-        self.performSegue(withIdentifier: "Trial details", sender: nil)
+        //self.performSegue(withIdentifier: "Trial details", sender: nil)
+        
+        self.performSegue(withIdentifier: "See Graph", sender: nil)
         
         self.captureButton.isHidden = false
         self.messageLabel.isHidden = false
@@ -602,7 +608,7 @@ class CameraViewController: UIViewController {
             //RHip - RKnee - RAnkle
             //LHip - LKnee - LAnkle
         
-        var angleSignal: [CGFloat] = [];
+        angleSignal = [];
         
         for frame in linesInFrames {
             
@@ -747,11 +753,29 @@ class CameraViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
+        if segue.identifier == "See Graph" {
+            if let DVC = segue.destination as? GraphViewController{
+                DVC.rawNumericEntries = angleSignal
+            } else {
+                print("Data NOT Passed! destination vc is not set to firstVC")
+            }
+        } else { print("Id doesnt match with Storyboard segue Id") }
+        
+        
+        
+        if let destination = segue.destination as? GraphViewController {
+            
+            destination.rawNumericEntries = angleSignal;
+        
+        }
+        
         if let destination = segue.destination as? TrialViewController {
             
             // last activity
             destination.activityID = session.activities.count-1
         }
+    
+    
     }
 }
 

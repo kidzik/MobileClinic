@@ -21,6 +21,7 @@
 		CA1155E31FDE4D06003E751E /* OpenCVWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */; };
 		CA1155E51FDE4D77003E751E /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E41FDE4D77003E751E /* Common.swift */; };
 		F74323CD21AA1A8D001FD647 /* MobileOpenPose.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */; };
+		F75020B721BC4F2D00DB14F9 /* GraphViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75020B621BC4F2D00DB14F9 /* GraphViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -58,6 +59,7 @@
 		CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCVWrapper.mm; sourceTree = "<group>"; };
 		CA1155E41FDE4D77003E751E /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MobileOpenPose.mlmodel; sourceTree = "<group>"; };
+		F75020B621BC4F2D00DB14F9 /* GraphViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +129,7 @@
 				CA1155E01FDE4D05003E751E /* MobileClinic-Bridging-Header.h */,
 				0B3C900321A41CEE00DDC146 /* Activities.swift */,
 				0B3C900721A41DC200DDC146 /* Session.swift */,
+				F75020B621BC4F2D00DB14F9 /* GraphViewController.swift */,
 			);
 			path = MobileClinic;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-MobileClinic/Pods-MobileClinic-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Charts/Charts.framework",
 				"${BUILT_PRODUCTS_DIR}/IteratorTools/IteratorTools.framework",
 				"${BUILT_PRODUCTS_DIR}/OpenCV/opencv2.framework",
 				"${BUILT_PRODUCTS_DIR}/Surge/Surge.framework",
@@ -243,6 +247,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Charts.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IteratorTools.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/opencv2.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Surge.framework",
@@ -268,6 +273,7 @@
 				CA1155D11FDE4CEE003E751E /* CameraViewController.swift in Sources */,
 				CA1155CF1FDE4CEE003E751E /* AppDelegate.swift in Sources */,
 				CA1155E31FDE4D06003E751E /* OpenCVWrapper.mm in Sources */,
+				F75020B721BC4F2D00DB14F9 /* GraphViewController.swift in Sources */,
 				0B3C900821A41DC200DDC146 /* Session.swift in Sources */,
 				F74323CD21AA1A8D001FD647 /* MobileOpenPose.mlmodel in Sources */,
 			);
