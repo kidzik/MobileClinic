@@ -15,13 +15,13 @@
 		BC2189EBCD4EA126322FF93B /* Pods_MobileClinic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11CC6C3D4B17C24B1D1133F9 /* Pods_MobileClinic.framework */; };
 		CA1155CF1FDE4CEE003E751E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155CE1FDE4CEE003E751E /* AppDelegate.swift */; };
 		CA1155D11FDE4CEE003E751E /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155D01FDE4CEE003E751E /* CameraViewController.swift */; };
-		CA1155D41FDE4CEE003E751E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA1155D21FDE4CEE003E751E /* Main.storyboard */; };
 		CA1155D61FDE4CEE003E751E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA1155D51FDE4CEE003E751E /* Assets.xcassets */; };
 		CA1155D91FDE4CEE003E751E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA1155D71FDE4CEE003E751E /* LaunchScreen.storyboard */; };
 		CA1155E31FDE4D06003E751E /* OpenCVWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E21FDE4D06003E751E /* OpenCVWrapper.mm */; };
 		CA1155E51FDE4D77003E751E /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA1155E41FDE4D77003E751E /* Common.swift */; };
 		F74323CD21AA1A8D001FD647 /* MobileOpenPose.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = F74323CC21AA1A8D001FD647 /* MobileOpenPose.mlmodel */; };
 		F75020B721BC4F2D00DB14F9 /* GraphViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75020B621BC4F2D00DB14F9 /* GraphViewController.swift */; };
+		F771911621CE18DF00376A8B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA1155D21FDE4CEE003E751E /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -197,9 +197,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F771911621CE18DF00376A8B /* Main.storyboard in Resources */,
 				CA1155D91FDE4CEE003E751E /* LaunchScreen.storyboard in Resources */,
 				CA1155D61FDE4CEE003E751E /* Assets.xcassets in Resources */,
-				CA1155D41FDE4CEE003E751E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

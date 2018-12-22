@@ -135,21 +135,32 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rDe-in-hrV" customClass="LineChartView" customModule="Charts">
-                                <rect key="frame" x="0.0" y="124" width="375" height="565"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rDe-in-hrV" customClass="LineChartView" customModule="Charts">
+                                <rect key="frame" x="0.0" y="223" width="375" height="348"/>
                                 <color key="backgroundColor" red="1" green="0.5409764051" blue="0.84731429820000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="0 Squats" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Gx-v1-KvB">
+                                <rect key="frame" x="56" y="627" width="262" height="55"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="36"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="rDe-in-hrV" firstAttribute="top" secondItem="PRY-Mb-ep0" secondAttribute="top" constant="80" id="IkC-sw-6pj"/>
-                            <constraint firstAttribute="trailing" secondItem="rDe-in-hrV" secondAttribute="trailing" id="JkL-x6-kPI"/>
-                            <constraint firstItem="rDe-in-hrV" firstAttribute="leading" secondItem="HLq-Va-iXI" secondAttribute="leading" id="OXl-fN-GgR"/>
-                            <constraint firstItem="rDe-in-hrV" firstAttribute="centerY" secondItem="HLq-Va-iXI" secondAttribute="centerY" id="tu7-eK-n9B"/>
+                            <constraint firstItem="rDe-in-hrV" firstAttribute="leading" secondItem="HLq-Va-iXI" secondAttribute="leading" id="849-Yy-FYf"/>
+                            <constraint firstItem="3Gx-v1-KvB" firstAttribute="leading" secondItem="PRY-Mb-ep0" secondAttribute="leading" constant="108" id="Ow4-a0-G4z"/>
+                            <constraint firstAttribute="trailing" secondItem="rDe-in-hrV" secondAttribute="trailing" id="TC9-jQ-m93"/>
+                            <constraint firstItem="3Gx-v1-KvB" firstAttribute="centerX" secondItem="rDe-in-hrV" secondAttribute="centerX" id="glb-8C-kuR"/>
+                            <constraint firstItem="PRY-Mb-ep0" firstAttribute="bottom" secondItem="3Gx-v1-KvB" secondAttribute="bottom" constant="102" id="rrf-dB-MhA"/>
+                            <constraint firstItem="3Gx-v1-KvB" firstAttribute="top" secondItem="rDe-in-hrV" secondAttribute="bottom" constant="50" id="tNt-ZI-WTh"/>
+                            <constraint firstAttribute="bottom" secondItem="rDe-in-hrV" secondAttribute="bottom" constant="241" id="ux8-HP-C2E"/>
+                            <constraint firstItem="rDe-in-hrV" firstAttribute="top" secondItem="PRY-Mb-ep0" secondAttribute="top" constant="179" id="xaz-n1-BcG"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="PRY-Mb-ep0"/>
                     </view>
                     <connections>
+                        <outlet property="SquatCount" destination="3Gx-v1-KvB" id="KFV-MZ-b3Y"/>
                         <outlet property="chart" destination="rDe-in-hrV" id="U7M-9f-Pws"/>
                     </connections>
                 </viewController>

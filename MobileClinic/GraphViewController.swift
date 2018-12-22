@@ -14,12 +14,16 @@ class GraphViewController: UIViewController {
 
     
     var rawNumericEntries = [CGFloat](); //data passed from segue
+    var numSquats: Int!
     var angleEntries =  [ChartDataEntry]();
     
     @IBOutlet weak var chart: LineChartView!
+    @IBOutlet weak var SquatCount: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        SquatCount.text = "\(numSquats!) Squats"
         
         var i: Double = 0;
         for float in rawNumericEntries {

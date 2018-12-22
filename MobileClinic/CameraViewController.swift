@@ -20,7 +20,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 1
+    let timeIntervalToCapture = 20
 //    let timeIntervalBeforeCaptureStart = 1
 //    let timeIntervalToCapture = 1
 
@@ -57,6 +57,8 @@ class CameraViewController: UIViewController {
     var canUsePhotoLibrary: Bool?
     
     var angleSignal: [CGFloat] = [];
+    
+    var numberOfTimesSquatted: Int = 0;
 
     fileprivate func openTrialView() {
         //self.performSegue(withIdentifier: "Trial details", sender: nil)
@@ -601,6 +603,19 @@ class CameraViewController: UIViewController {
          case LEar = 17
          case Background = 18
          }
+         
+         let CocoColors = [UIColor.rgb(255, 0, 0),  UIColor.rgb(255, 85, 0), UIColor.rgb(255, 170, 0),UIColor.rgb(255, 255, 0),
+         UIColor.rgb(170, 255, 0),UIColor.rgb(85, 255, 0), UIColor.rgb(0, 255, 0),
+         
+         UIColor.rgb(0, 255, 85), [7]
+         UIColor.rgb(0, 255, 170), [8]
+         UIColor.rgb(0, 255, 255), [9]
+         UIColor.rgb(0, 170, 255), [10]
+         UIColor.rgb(0, 85, 255), [11]
+         UIColor.rgb(0, 0, 255),  UIColor.rgb(85, 0, 255), UIColor.rgb(170, 0, 255),
+         UIColor.rgb(255, 0, 255),
+         UIColor.rgb(255, 0, 170),UIColor.rgb(255, 0, 85)]
+
  
         */
         
@@ -623,22 +638,47 @@ class CameraViewController: UIViewController {
                 
                 let RHip_to_RKnee_slope = computeSlopeOfSegment(segment: RHip_to_RKnee);
                 let RKnee_to_RAnkle_slope = computeSlopeOfSegment(segment: RKnee_to_RAnkle);
+                
                 rightleg_angle = computeAngleBetweenTwoSlopes(slope1: RHip_to_RKnee_slope, slope2: RKnee_to_RAnkle_slope);
             }
             
-            if (frame.count >= 11) { //for similar reasons as above, check length
+            if (frame.count >= 12) { //for similar reasons as above, check length
                 let LHip_to_LKnee: Line = frame[10];
                 let LKnee_to_LAnkle: Line = frame[11];
-                
+
                 let LHip_to_LKnee_slope = computeSlopeOfSegment(segment: LHip_to_LKnee);
                 let LKnee_to_LAnkle_slope = computeSlopeOfSegment(segment: LKnee_to_LAnkle);
                 leftleg_angle = computeAngleBetweenTwoSlopes(slope1: LHip_to_LKnee_slope, slope2: LKnee_to_LAnkle_slope);
             }
             
-            angleSignal.append(rightleg_angle + leftleg_angle);
+            //average the left angle and right angle to get a better estimate
+            
+            var angle_to_add: CGFloat = 0;
+            
+            if (leftleg_angle != 0 && rightleg_angle != 0) {
+                angle_to_add = (leftleg_angle + rightleg_angle);
+            } else if(leftleg_angle == 0 && rightleg_angle != 0) {
+                angle_to_add = 2*rightleg_angle
+            } else if(leftleg_angle != 0 && rightleg_angle == 0) {
+                angle_to_add = 2*leftleg_angle;
+            }
+            
+            angleSignal.append(angle_to_add);
+            
+            //when squatting, this angle should be from (45, 90) degrees
         }
         
+        //if the patient is standing, then the angles in angleSignal will be NaN, this is bad for processing
+        //let's remove all NaN
+        var cleanedSignal: [CGFloat] = [];
+        for value in angleSignal {
+            if(!value.isNaN) {
+                cleanedSignal.append(value);
+            }
+        }
         
+        angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
+        determineNumberOfSquats(input: angleSignal);
         
         last_score += 10
         return (last_score, "Well done!")
@@ -650,6 +690,10 @@ class CameraViewController: UIViewController {
         var angle_rad = CGFloat(Surge.atan(Double(temp_calc)))
         
         var angle = angle_rad * (180/CGFloat.pi)
+        
+        if (angle < 0) {
+            angle = -angle;
+        }
         
         return angle;
     }
@@ -665,6 +709,119 @@ class CameraViewController: UIViewController {
         let slope: CGFloat = (y2 - y1)/(x2-x1);
         
         return slope;
+    }
+    
+    func movingAverageFilter(filterWidth: Int, inputData: [CGFloat]) -> [CGFloat]{
+        
+        var filtered_signal: [CGFloat] = []
+        
+        for (index, value) in inputData.enumerated() {
+            if ( (index > Int(filterWidth/2)) && (index < Int(inputData.count - filterWidth/2))) {
+                var selection_for_average = subArray(array: inputData, s: Int(index-filterWidth/2), e: Int(index + filterWidth/2));
+                var average = arithmeticMean(array: selection_for_average);
+                filtered_signal.append(average);
+            }
+        }
+        return filtered_signal;
+    }
+    
+    // Function to calculate the arithmetic mean
+    func arithmeticMean(array: [CGFloat]) -> CGFloat {
+        var total: CGFloat = 0
+        for number in array {
+            total += number
+        }
+        return total / CGFloat(array.count)
+    }
+    
+    // Function to extract some range from an array
+    func subArray<T>(array: [T], s: Int, e: Int) -> [T] {
+        if e > array.count {
+            return []
+        }
+        return Array(array[s..<min(e, array.count)])
+    }
+    
+    //Determine number of squats
+    func determineNumberOfSquats(input: [CGFloat]) {
+        
+        var doubleInput = input.map {
+            Double($0)
+        }
+        
+        var (signals, avgFilter, stdFilter) = ThresholdingAlgo(y: doubleInput, lag: 10, threshold: 0, influence: 2);
+        
+        var previous = 0;
+        var numberOfSquats = 0;
+        for (index, value) in signals.enumerated() {
+            if (value != previous) {
+                numberOfSquats += 1;
+            }
+            previous = value;
+        }
+        print("You squatted \(numberOfSquats) times");
+        
+        numberOfTimesSquatted = numberOfSquats;
+        
+        
+    }
+    
+    // Function to calculate the arithmetic mean
+    func arithmeticMean(array: [Double]) -> Double {
+        var total: Double = 0
+        for number in array {
+            total += number
+        }
+        return total / Double(array.count)
+    }
+    
+    // Function to calculate the standard deviation
+    func standardDeviation(array: [Double]) -> Double
+    {
+        let length = Double(array.count)
+        let avg = array.reduce(0, {$0 + $1}) / length
+        let sumOfSquaredAvgDiff = array.map { pow($0 - avg, 2.0)}.reduce(0, {$0 + $1})
+        return sqrt(sumOfSquaredAvgDiff / length)
+    }
+    
+    // Smooth z-score thresholding filter
+    func ThresholdingAlgo(y: [Double],lag: Int,threshold: Double,influence: Double) -> ([Int],[Double],[Double]) {
+        
+        // Create arrays
+        var signals   = Array(repeating: 0, count: y.count)
+        var filteredY = Array(repeating: 0.0, count: y.count)
+        var avgFilter = Array(repeating: 0.0, count: y.count)
+        var stdFilter = Array(repeating: 0.0, count: y.count)
+        
+        // Initialise variables
+        for i in 0...lag-1 {
+            signals[i] = 0
+            filteredY[i] = y[i]
+        }
+        
+        // Start filter
+        avgFilter[lag-1] = arithmeticMean(array: subArray(array: y, s: 0, e: lag-1))
+        stdFilter[lag-1] = standardDeviation(array: subArray(array: y, s: 0, e: lag-1))
+        
+        for i in lag...y.count-1 {
+            if abs(y[i] - avgFilter[i-1]) > threshold*stdFilter[i-1] {
+                if y[i] > avgFilter[i-1] {
+                    signals[i] = 1      // Positive signal
+                } else {
+                    // Negative signals are turned off for this application
+                    //signals[i] = -1       // Negative signal
+                }
+                filteredY[i] = influence*y[i] + (1-influence)*filteredY[i-1]
+            } else {
+                signals[i] = 0          // No signal
+                filteredY[i] = y[i]
+            }
+            // Adjust the filters
+            avgFilter[i] = arithmeticMean(array: subArray(array: filteredY, s: i-lag, e: i))
+            stdFilter[i] = standardDeviation(array: subArray(array: filteredY, s: i-lag, e: i))
+        }
+        
+        return (signals,avgFilter,stdFilter)
     }
     
     
@@ -756,6 +913,7 @@ class CameraViewController: UIViewController {
         if segue.identifier == "See Graph" {
             if let DVC = segue.destination as? GraphViewController{
                 DVC.rawNumericEntries = angleSignal
+                DVC.numSquats = numberOfTimesSquatted;
             } else {
                 print("Data NOT Passed! destination vc is not set to firstVC")
             }
@@ -766,7 +924,7 @@ class CameraViewController: UIViewController {
         if let destination = segue.destination as? GraphViewController {
             
             destination.rawNumericEntries = angleSignal;
-        
+            destination.numSquats = numberOfTimesSquatted;
         }
         
         if let destination = segue.destination as? TrialViewController {
