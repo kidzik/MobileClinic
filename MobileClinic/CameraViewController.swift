@@ -678,10 +678,39 @@ class CameraViewController: UIViewController {
         }
         
         angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
+        
+        //now let's write the signal to a CSV file and also export it by email
+        exportSignalToCSV(inputSignal: angleSignal);
+        
+        //old, broken squat detection code.
         determineNumberOfSquats(input: angleSignal);
         
-        last_score += 10
-        return (last_score, "Well done!")
+        last_score += 10;
+        return (last_score, "Well done!");
+    }
+    
+    func exportSignalToCSV(inputSignal: [CGFloat]) {
+        
+        let fileName = "signal.csv";
+        let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
+        
+        var csvBody = "Index, Amplitude\n";
+        
+        for (index, value) in inputSignal.enumerated() {
+            let row = "\(index),\(value)\n";
+            csvBody.append(contentsOf: row);
+        }
+        
+        do {
+            try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
+        } catch {
+            print("Failed to create file");
+            print("\(error)");
+        }
+        
+        //display a popup giving the user options to send the CSV
+        let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
+        present(vc, animated: true, completion: nil)
     }
     
     func computeAngleBetweenTwoSlopes(slope1: CGFloat, slope2: CGFloat) -> CGFloat{
