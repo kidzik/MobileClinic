@@ -680,24 +680,34 @@ class CameraViewController: UIViewController {
         angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
         
         //now let's write the signal to a CSV file and also export it by email
-        exportSignalToCSV(inputSignal: angleSignal);
+        exportSignalToCSV(originalSignal: cleanedSignal, filteredSignal: angleSignal);
         
         //old, broken squat detection code.
-        determineNumberOfSquats(input: angleSignal);
+        //determineNumberOfSquats(input: angleSignal);
         
         last_score += 10;
         return (last_score, "Well done!");
     }
     
-    func exportSignalToCSV(inputSignal: [CGFloat]) {
+    func exportSignalToCSV(originalSignal: [CGFloat], filteredSignal: [CGFloat]) {
         
         let fileName = "signal.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, Amplitude\n";
+        var csvBody = "Index, Filtered Signal, Original Signal\n";
         
-        for (index, value) in inputSignal.enumerated() {
-            let row = "\(index),\(value)\n";
+    
+        //the filtered signal is SMALLER than the original signal
+        
+        for (index, originalValue) in originalSignal.enumerated() {
+            
+            var filteredValue: CGFloat = 0;
+            
+            if(index < filteredSignal.count) {
+                filteredValue = filteredSignal[index];
+            }
+            
+            let row = "\(index),\(filteredValue),\(originalValue)\n";
             csvBody.append(contentsOf: row);
         }
         
