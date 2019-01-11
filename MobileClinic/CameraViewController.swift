@@ -577,11 +577,12 @@ class CameraViewController: UIViewController {
     }
 
     func calculateResult(linesInFrames: [[Line]]) -> (Int, String) {
-        
+    
         
         /*
          Common.swift
          ___________________
+         
          enum CocoPart: Int {
          case Nose = 0
          case Neck = 1
@@ -604,33 +605,52 @@ class CameraViewController: UIViewController {
          case Background = 18
          }
          
-         let CocoColors = [UIColor.rgb(255, 0, 0),  UIColor.rgb(255, 85, 0), UIColor.rgb(255, 170, 0),UIColor.rgb(255, 255, 0),
-         UIColor.rgb(170, 255, 0),UIColor.rgb(85, 255, 0), UIColor.rgb(0, 255, 0),
+         let CocoPairs = [
+         (1, 2) [index 0], (1, 5) [index 1], (2, 3) [index 2], (3, 4) [index 3], (5, 6) [index 4],
+         (6, 7) [index 5],(1, 8) [index 6], (8, 9) [index 7], (9, 10) [index 8], (1, 11) [index 9],
+         (11, 12) [index 10], (12, 13) [index 11], (1, 0) [index 12], (0, 14) [index 13],
+         (14, 16) [index 14], (0, 15) [index 15], (15, 17) [index 16], (2, 16) [index 17], (5, 17) [index 18]
+         ]
+        
          
-         UIColor.rgb(0, 255, 85), [7]
-         UIColor.rgb(0, 255, 170), [8]
-         UIColor.rgb(0, 255, 255), [9]
-         UIColor.rgb(0, 170, 255), [10]
-         UIColor.rgb(0, 85, 255), [11]
-         UIColor.rgb(0, 0, 255),  UIColor.rgb(85, 0, 255), UIColor.rgb(170, 0, 255),
-         UIColor.rgb(255, 0, 255),
-         UIColor.rgb(255, 0, 170),UIColor.rgb(255, 0, 85)]
-
- 
+         Signals representing human movement to investigate
+         --------------------------------------------------
+         - to calculate the angle that the leg is bending we can construct:
+            - S1(t) = ANLGE (RHip - RKnee - RAnkle)
+            - S2(t) = ANGLE(LHip - LKnee - LAnkle)
+         - the y position of the face/head is also very valuable because it tells us when the patient is standing/sitting indicated by their height
+            - S3(t) = Nose_Coordinate.y
+         - the X and Y position of the RHip and LHip - as the person squats the X position should move back as the person sits in the chair and as the person stands, the x position will become collinear with the person's spine. In terms of the y position change, as the person sits, the y position will decrease below the midline and as the person stands it will increase above the midline.
         */
         
-        //to calculate the angle that the leg is bending we can compute between:
-            //RHip - RKnee - RAnkle
-            //LHip - LKnee - LAnkle
         
-        angleSignal = [];
+        //lists to contain our amplitudal information
+        var rightLegAngleSignal: [CGFloat] = [];
+        var leftLegAngleSignal: [CGFloat] = [];
         
+        var yPositionOfNoseSignal: [CGFloat] = [];
+        
+        var xPositionOfRHipSignal: [CGFloat] = [];
+        var yPositionOfRHipSignal: [CGFloat] = [];
+        
+        var xPositionOfLHipSignal: [CGFloat] = [];
+        var yPositionOfLHipSignal: [CGFloat] = [];
+        
+        
+        //iterate over frames in video and extract keypoints
         for frame in linesInFrames {
             
-            var rightleg_angle: CGFloat = 0;
-            var leftleg_angle: CGFloat = 0;
+            var rightleg_angle: CGFloat = CGFloat.nan;
+            var leftleg_angle: CGFloat = CGFloat.nan;
             
-        
+            var nose_y: CGFloat = CGFloat.nan;
+            
+            var rhip_x: CGFloat = CGFloat.nan;
+            var rhip_y: CGFloat = CGFloat.nan;
+            
+            var lhip_x: CGFloat = CGFloat.nan;
+            var lhip_y: CGFloat = CGFloat.nan;
+            
             if(frame.count >= 9) { //we must ensure that openpose actually found the segments in this frame, otherwise the
                                     //app will crash
                 let RHip_to_RKnee: Line = frame[7];
@@ -651,66 +671,79 @@ class CameraViewController: UIViewController {
                 leftleg_angle = computeAngleBetweenTwoSlopes(slope1: LHip_to_LKnee_slope, slope2: LKnee_to_LAnkle_slope);
             }
             
-            //average the left angle and right angle to get a better estimate
-            
-            var angle_to_add: CGFloat = 0;
-            
-            if (leftleg_angle != 0 && rightleg_angle != 0) {
-                angle_to_add = (leftleg_angle + rightleg_angle);
-            } else if(leftleg_angle == 0 && rightleg_angle != 0) {
-                angle_to_add = 2*rightleg_angle
-            } else if(leftleg_angle != 0 && rightleg_angle == 0) {
-                angle_to_add = 2*leftleg_angle;
+            if (frame.count >= 13) {
+                let Nose_to_Neck: Line = frame[12];
+                let Nose_coordinates: CGPoint = Nose_to_Neck.start;
+                nose_y = Nose_coordinates.y;
             }
             
-            angleSignal.append(angle_to_add);
-            
-            //when squatting, this angle should be from (45, 90) degrees
-        }
-        
-        //if the patient is standing, then the angles in angleSignal will be NaN, this is bad for processing
-        //let's remove all NaN
-        var cleanedSignal: [CGFloat] = [];
-        for value in angleSignal {
-            if(!value.isNaN) {
-                cleanedSignal.append(value);
+            if(frame.count >= 10) {
+                let Neck_to_LHip: Line = frame[9];
+                let LHip_point: CGPoint = Neck_to_LHip.end;
+                
+                lhip_x = LHip_point.x;
+                lhip_y = LHip_point.y;
             }
+            
+            if(frame.count >= 7) {
+                let Neck_to_Rhip: Line = frame[6];
+                let RHip_point: CGPoint = Neck_to_Rhip.end;
+                
+                rhip_x = RHip_point.x;
+                lhip_y = RHip_point.y;
+            }
+            
+            //add all of the metrics to our different signals.
+            //if the model was unable to find the keypoint then nil is placed into the signal.
+            
+            rightLegAngleSignal.append(rightleg_angle);
+            leftLegAngleSignal.append(leftleg_angle);
+           
+            yPositionOfNoseSignal.append(nose_y);
+            
+            xPositionOfRHipSignal.append(rhip_x);
+            yPositionOfRHipSignal.append(rhip_y);
+        
+            xPositionOfLHipSignal.append(lhip_x);
+            yPositionOfLHipSignal.append(lhip_y);
+            
+            
         }
         
-        angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
+        //angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
         
         //now let's write the signal to a CSV file and also export it by email
-        exportSignalToCSV(originalSignal: cleanedSignal, filteredSignal: angleSignal);
         
-        //old, broken squat detection code.
-        //determineNumberOfSquats(input: angleSignal);
-        
-        last_score += 10;
-        return (last_score, "Well done!");
-    }
-    
-    func exportSignalToCSV(originalSignal: [CGFloat], filteredSignal: [CGFloat]) {
-        
-        let fileName = "signal.csv";
+        let fileName = "all_signals.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, Filtered Signal, Original Signal\n";
+        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal\n";
         
-    
+        
         //the filtered signal is SMALLER than the original signal
         
-        for (index, originalValue) in originalSignal.enumerated() {
+        var lengths = [rightLegAngleSignal.count, leftLegAngleSignal.count, yPositionOfNoseSignal.count, xPositionOfRHipSignal.count, yPositionOfRHipSignal.count, xPositionOfLHipSignal.count, yPositionOfLHipSignal.count]
+        
+        var max_len = Int(lengths.max()!);
+        
+        for var index in 0..<max_len {
             
-            var filteredValue: CGFloat = 0;
+            var RLeg_angle = rightLegAngleSignal[index];
+            var LLeg_angle = leftLegAngleSignal[index];
             
-            if(index < filteredSignal.count) {
-                filteredValue = filteredSignal[index];
-            }
+            var yPosNose = yPositionOfNoseSignal[index];
             
-            let row = "\(index),\(filteredValue),\(originalValue)\n";
+            var RHipXPos = xPositionOfRHipSignal[index];
+            var RHipYPos = yPositionOfRHipSignal[index];
+            
+            var LHipXPos = xPositionOfLHipSignal[index];
+            var LHipYPos = yPositionOfLHipSignal[index];
+            
+            let row = "\(index),\(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos)\n";
+            
             csvBody.append(contentsOf: row);
         }
-        
+    
         do {
             try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
         } catch {
@@ -721,6 +754,10 @@ class CameraViewController: UIViewController {
         //display a popup giving the user options to send the CSV
         let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
         present(vc, animated: true, completion: nil)
+       
+        
+        last_score += 10;
+        return (last_score, "Well done!");
     }
     
     func computeAngleBetweenTwoSlopes(slope1: CGFloat, slope2: CGFloat) -> CGFloat{
