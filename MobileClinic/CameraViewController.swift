@@ -690,7 +690,7 @@ class CameraViewController: UIViewController {
                 let RHip_point: CGPoint = Neck_to_Rhip.end;
                 
                 rhip_x = RHip_point.x;
-                lhip_y = RHip_point.y;
+                rhip_y = RHip_point.y;
             }
             
             //add all of the metrics to our different signals.
