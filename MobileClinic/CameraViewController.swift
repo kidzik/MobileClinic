@@ -743,7 +743,6 @@ class CameraViewController: UIViewController {
             
             csvBody.append(contentsOf: row);
         }
-    
         do {
             try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
         } catch {
@@ -821,23 +820,21 @@ class CameraViewController: UIViewController {
     //Determine number of squats
     func determineNumberOfSquats(input: [CGFloat]) {
         
-        var doubleInput = input.map {
-            Double($0)
-        }
         
-        var (signals, avgFilter, stdFilter) = ThresholdingAlgo(y: doubleInput, lag: 10, threshold: 0, influence: 2);
+        var signal: [Float] = input.map{Float($0)}
+    
+    
+        var pgram = Float((2.0)/(Float(signal.count))) * Surge.pow(  Surge.sqrt(  Surge.sum( Surge.pow(  Surge.fft(signal)  , 2  )     )    )  , 2 )
+
         
-        var previous = 0;
-        var numberOfSquats = 0;
-        for (index, value) in signals.enumerated() {
-            if (value != previous) {
-                numberOfSquats += 1;
-            }
-            previous = value;
-        }
-        print("You squatted \(numberOfSquats) times");
         
-        numberOfTimesSquatted = numberOfSquats;
+        
+       
+        
+        
+        //print("You squatted \(numberOfSquats) times");
+        
+        //numberOfTimesSquatted = numberOfSquats;
         
         
     }
@@ -899,8 +896,6 @@ class CameraViewController: UIViewController {
         
         return (signals,avgFilter,stdFilter)
     }
-    
-    
     
     func showAlert(title: String, message: String, btnText: String, completion: @escaping () -> Void = {}) {
         NSLog("showAlert \(title) \(message)")
