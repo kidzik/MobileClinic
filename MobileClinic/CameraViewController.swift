@@ -20,7 +20,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 20
+    let timeIntervalToCapture = 7
 //    let timeIntervalBeforeCaptureStart = 1
 //    let timeIntervalToCapture = 1
 
@@ -710,6 +710,9 @@ class CameraViewController: UIViewController {
             
         }
         
+        
+        determineNumberOfSquats(input: rightLegAngleSignal)
+        
         //angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
         
         //now let's write the signal to a CSV file and also export it by email
@@ -820,9 +823,14 @@ class CameraViewController: UIViewController {
     //Determine number of squats
     func determineNumberOfSquats(input: [CGFloat]) {
         
+        //remove all NaN values from the array
+        var signal: [Float] = []
         
-        var signal: [Float] = input.map{Float($0)}
-    
+        for val in input {
+            if (!val.isNaN) {
+                signal.append(Float(val))
+            }
+        }
     
         var pgram = Float((2.0)/(Float(signal.count))) * Surge.pow(  Surge.sqrt(  Surge.sum( Surge.pow(  Surge.fft(signal)  , 2  )     )    )  , 2 )
 
