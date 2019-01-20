@@ -20,7 +20,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 7
+    let timeIntervalToCapture = 20
 //    let timeIntervalBeforeCaptureStart = 1
 //    let timeIntervalToCapture = 1
 
@@ -832,18 +832,41 @@ class CameraViewController: UIViewController {
             }
         }
     
-        var pgram = Float((2.0)/(Float(signal.count))) * Surge.pow(  Surge.sqrt(  Surge.sum( Surge.pow(  Surge.fft(signal)  , 2  )     )    )  , 2 )
+        var fft_mat = Surge.pow(Surge.fft(signal), 2)
+        
+        var const_mult = 2.0/Double(signal.count)
+        
+        for var i in 0..<fft_mat.count {
+            fft_mat[i] = Float(const_mult) * fft_mat[i]
+        }
+        
+        var pgram = fft_mat
+        
+        
 
+        //now let's save the pgram to a CSV to we can inspect it in Python
         
+        let fileName = "pgram.csv";
+        let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
+        var csvBody = "Index, pgram\n";
         
-       
+        for var index in 0..<pgram.count {
+            
+            let row = "\(index),\(pgram[index])\n";
+            
+            csvBody.append(contentsOf: row);
+        }
+        do {
+            try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
+        } catch {
+            print("Failed to create file");
+            print("\(error)");
+        }
         
-        
-        //print("You squatted \(numberOfSquats) times");
-        
-        //numberOfTimesSquatted = numberOfSquats;
-        
+        //display a popup giving the user options to send the CSV
+        let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
+        present(vc, animated: true, completion: nil)
         
     }
     
