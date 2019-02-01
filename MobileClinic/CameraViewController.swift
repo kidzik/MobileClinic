@@ -4,6 +4,7 @@ import Vision
 import Photos
 import Surge
 import Charts
+import Accelerate
 
 
 let imageSize = 368
@@ -11,6 +12,7 @@ let imageSize = 368
 var last_score = 50
 
 class CameraViewController: UIViewController {
+    
     @IBOutlet weak var cameraView: UIImageView!
     @IBOutlet weak var previewView: UIImageView!
     @IBOutlet weak var messageLabel: UILabelStroked!
@@ -21,9 +23,7 @@ class CameraViewController: UIViewController {
     
     let timeIntervalBeforeCaptureStart = 1
     let timeIntervalToCapture = 20
-//    let timeIntervalBeforeCaptureStart = 1
-//    let timeIntervalToCapture = 1
-
+    
     var isRecording = false
     var text_timeIntervalBeforeCaptureStart = "%d seconds to prepare"
     var text_timeIntervalToCapture = "%d seconds captured"
@@ -59,11 +59,11 @@ class CameraViewController: UIViewController {
     var angleSignal: [CGFloat] = [];
     
     var numberOfTimesSquatted: Int = 0;
-
+    
     fileprivate func openTrialView() {
-        //self.performSegue(withIdentifier: "Trial details", sender: nil)
+        self.performSegue(withIdentifier: "Trial details", sender: nil)
         
-        self.performSegue(withIdentifier: "See Graph", sender: nil)
+        //self.performSegue(withIdentifier: "See Graph", sender: nil)
         
         self.captureButton.isHidden = false
         self.messageLabel.isHidden = false
@@ -710,42 +710,75 @@ class CameraViewController: UIViewController {
             
         }
         
+        var pgram_rightLegAngleSignal = determineNumberOfSquats(input: rightLegAngleSignal)
         
-        determineNumberOfSquats(input: rightLegAngleSignal)
+        var pgram_leftLegAngleSignal = determineNumberOfSquats(input: leftLegAngleSignal)
         
-        //angleSignal = movingAverageFilter(filterWidth: 20, inputData: cleanedSignal);
+        var pgram_yPositionOfNoseSignal = determineNumberOfSquats(input: yPositionOfNoseSignal)
         
+        var pgram_xPositionOfRHipSignal = determineNumberOfSquats(input: xPositionOfRHipSignal)
+        var pgram_yPositionOfRhipSignal = determineNumberOfSquats(input: yPositionOfRHipSignal)
+        
+        var pgram_xPositionOfLHipSignal = determineNumberOfSquats(input: xPositionOfLHipSignal)
+        var pgram_yPositionOfLhipSignal = determineNumberOfSquats(input: yPositionOfLHipSignal)
+        
+        
+        var pgram_combined: [[Float]] = [pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal]
+        
+
         //now let's write the signal to a CSV file and also export it by email
         
         let fileName = "all_signals.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal\n";
+        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal\n";
         
         
         //the filtered signal is SMALLER than the original signal
         
-        var lengths = [rightLegAngleSignal.count, leftLegAngleSignal.count, yPositionOfNoseSignal.count, xPositionOfRHipSignal.count, yPositionOfRHipSignal.count, xPositionOfLHipSignal.count, yPositionOfLHipSignal.count]
+        var lengths = [rightLegAngleSignal.count, leftLegAngleSignal.count, yPositionOfNoseSignal.count, xPositionOfRHipSignal.count, yPositionOfRHipSignal.count, xPositionOfLHipSignal.count, yPositionOfLHipSignal.count, rightLegAngleSignal.count]
         
         var max_len = Int(lengths.max()!);
         
         for var index in 0..<max_len {
             
-            var RLeg_angle = rightLegAngleSignal[index];
-            var LLeg_angle = leftLegAngleSignal[index];
+            var row_building_up = ""
             
-            var yPosNose = yPositionOfNoseSignal[index];
+            for signal_index in 0..<pgram_combined.count {
+                var value: CGFloat? = safe_access(signal: pgram_combined[signal_index], index: index)
+                
+                var should_add_comma = true
+                
+                if (signal_index == pgram_combined.count - 1) {
+                    should_add_comma = false
+                }
+                
+                if(should_add_comma) {
+                    //add ,
+                    if(value != nil) {
+                        row_building_up += value!.description
+                    }
+                    row_building_up += ","
+                } else {
+                    //add \n
+                    if(value != nil) {
+                        row_building_up += value!.description
+                    }
+                    row_building_up += "\n"
+                }
+            }
             
-            var RHipXPos = xPositionOfRHipSignal[index];
-            var RHipYPos = yPositionOfRHipSignal[index];
+//            var row = "\(index), \(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos)\n";
+//
+//            if (index < pgram.count) {
+//                var pgram_val = pgram[index]
+//                row = "\(index), \(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos),\(pgram_val)\n";
+//            }
             
-            var LHipXPos = xPositionOfLHipSignal[index];
-            var LHipYPos = yPositionOfLHipSignal[index];
-            
-            let row = "\(index),\(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos)\n";
-            
-            csvBody.append(contentsOf: row);
+            csvBody.append(contentsOf: row_building_up);
         }
+        
+        
         do {
             try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
         } catch {
@@ -756,10 +789,29 @@ class CameraViewController: UIViewController {
         //display a popup giving the user options to send the CSV
         let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
         present(vc, animated: true, completion: nil)
+        
+        vc.completionWithItemsHandler = {
+            (activity, success, items, error) in
+            if(success && error == nil){
+                //Do Work
+                self.dismiss(animated: true, completion: nil);
+            }
+            else if (error != nil){
+                //log the error
+            }
+        };
        
         
         last_score += 10;
         return (last_score, "Well done!");
+    }
+    
+    func safe_access(signal: [Float], index: Int) -> CGFloat? {
+        if(index < signal.count && index > 0) {
+            return CGFloat(signal[index])
+        } else {
+            return nil
+        }
     }
     
     func computeAngleBetweenTwoSlopes(slope1: CGFloat, slope2: CGFloat) -> CGFloat{
@@ -821,7 +873,7 @@ class CameraViewController: UIViewController {
     }
     
     //Determine number of squats
-    func determineNumberOfSquats(input: [CGFloat]) {
+    func determineNumberOfSquats(input: [CGFloat]) -> [Float] {
         
         //remove all NaN values from the array
         var signal: [Float] = []
@@ -831,6 +883,10 @@ class CameraViewController: UIViewController {
                 signal.append(Float(val))
             }
         }
+        
+        //linearly interpolate the NaN values to give constant ∆t = 1
+        
+        //signal = linearly_interpolate(input_x: <#T##[Double]#>, input_y: <#T##[Double]#>)
     
         var fft_mat = Surge.pow(Surge.fft(signal), 2)
         
@@ -846,28 +902,45 @@ class CameraViewController: UIViewController {
 
         //now let's save the pgram to a CSV to we can inspect it in Python
         
-        let fileName = "pgram.csv";
-        let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
-        
-        var csvBody = "Index, pgram\n";
-        
-        for var index in 0..<pgram.count {
-            
-            let row = "\(index),\(pgram[index])\n";
-            
-            csvBody.append(contentsOf: row);
-        }
-        do {
-            try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
-        } catch {
-            print("Failed to create file");
-            print("\(error)");
-        }
+//        let fileName = "pgram.csv";
+//        let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
+//
+//        var csvBody = "Index, pgram\n";
+//
+//        for var index in 0..<pgram.count {
+//
+//            let row = "\(index),\(pgram[index])\n";
+//
+//            csvBody.append(contentsOf: row);
+//        }
+//        do {
+//            try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
+//        } catch {
+//            print("Failed to create file");
+//            print("\(error)");
+//        }
         
         //display a popup giving the user options to send the CSV
-        let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
-        present(vc, animated: true, completion: nil)
+//        let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
+//        present(vc, animated: true, completion: nil)
         
+        return pgram
+    }
+    
+    func linearly_interpolate(input_x: [Double], input_y: [Double]) -> [Double]{
+        
+        var new_values = [Double](repeating: 0,
+                                  count: Int(input_x[input_x.count - 1]) + 1)
+        
+        let stride = vDSP_Stride(1)
+        
+        vDSP_vgenpD(input_y, stride,
+                    input_x, stride,
+                    &new_values, stride,
+                    vDSP_Length(new_values.count),
+                    vDSP_Length(input_y.count))
+        
+        return new_values
     }
     
     // Function to calculate the arithmetic mean

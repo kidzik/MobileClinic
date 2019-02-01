@@ -10,7 +10,7 @@ target 'MobileClinic' do
   pod 'Upsurge', '~> 0.10.2'
   pod 'IteratorTools', '~> 1.1.0'
   pod 'OpenCV', '~> 3.3.1'
-  pod 'Surge', '~> 2.0.0'
+  pod 'Surge', '~> 2.2.0'
   pod 'Charts'
 
 end
