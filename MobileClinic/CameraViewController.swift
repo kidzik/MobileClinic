@@ -22,7 +22,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 20
+    let timeIntervalToCapture = 7
     
     var isRecording = false
     var text_timeIntervalBeforeCaptureStart = "%d seconds to prepare"
@@ -384,7 +384,7 @@ class CameraViewController: UIViewController {
 //            self.messageLabel.isHidden = true
             self.captureButton.isHidden = true
 //            self.selectButton.isHidden = true
-            self.progressLabel.strokedText = "Detecting bones...(0%)"
+            self.progressLabel.strokedText = "Detecting Pose ...(0%)"
             self.progressLabel.isHidden = false
             self.progressView.setProgress(0.0, animated: false)
             self.progressView.isHidden = false
@@ -710,20 +710,25 @@ class CameraViewController: UIViewController {
             
         }
         
-        var pgram_rightLegAngleSignal = determineNumberOfSquats(input: rightLegAngleSignal)
+        //var rightLegAngleSignal_interpolated = linearly_interpolate(input_x: Array(0...rightLegAngleSignal.count-1).map{Double($0)}, input_y: rightLegAngleSignal.map{Double($0)})
         
-        var pgram_leftLegAngleSignal = determineNumberOfSquats(input: leftLegAngleSignal)
+        //^^ How to generate just the interpolation of a biometric signal
         
-        var pgram_yPositionOfNoseSignal = determineNumberOfSquats(input: yPositionOfNoseSignal)
+        var pgram_rightLegAngleSignal = generate_pgram(input: rightLegAngleSignal)
         
-        var pgram_xPositionOfRHipSignal = determineNumberOfSquats(input: xPositionOfRHipSignal)
-        var pgram_yPositionOfRhipSignal = determineNumberOfSquats(input: yPositionOfRHipSignal)
+        var pgram_leftLegAngleSignal = generate_pgram(input: leftLegAngleSignal)
         
-        var pgram_xPositionOfLHipSignal = determineNumberOfSquats(input: xPositionOfLHipSignal)
-        var pgram_yPositionOfLhipSignal = determineNumberOfSquats(input: yPositionOfLHipSignal)
+        var pgram_yPositionOfNoseSignal = generate_pgram(input: yPositionOfNoseSignal)
+        
+        var pgram_xPositionOfRHipSignal = generate_pgram(input: xPositionOfRHipSignal)
+        var pgram_yPositionOfRhipSignal = generate_pgram(input: yPositionOfRHipSignal)
+        
+        var pgram_xPositionOfLHipSignal = generate_pgram(input: xPositionOfLHipSignal)
+        var pgram_yPositionOfLhipSignal = generate_pgram(input: yPositionOfLHipSignal)
         
         
-        var pgram_combined: [[Float]] = [pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal]
+        var all_signals_for_csv: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
+                                        yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal]
         
 
         //now let's write the signal to a CSV file and also export it by email
@@ -736,20 +741,24 @@ class CameraViewController: UIViewController {
         
         //the filtered signal is SMALLER than the original signal
         
-        var lengths = [rightLegAngleSignal.count, leftLegAngleSignal.count, yPositionOfNoseSignal.count, xPositionOfRHipSignal.count, yPositionOfRHipSignal.count, xPositionOfLHipSignal.count, yPositionOfLHipSignal.count, rightLegAngleSignal.count]
+        var lengths = all_signals_for_csv.map{$0.count}
+        
+        //[rightLegAngleSignal.count, leftLegAngleSignal.count, yPositionOfNoseSignal.count, xPositionOfRHipSignal.count, yPositionOfRHipSignal.count, xPositionOfLHipSignal.count, yPositionOfLHipSignal.count, rightLegAngleSignal.count]
         
         var max_len = Int(lengths.max()!);
         
         for var index in 0..<max_len {
             
-            var row_building_up = ""
+            //var row_building_up = "\(index),\(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos)";
             
-            for signal_index in 0..<pgram_combined.count {
-                var value: CGFloat? = safe_access(signal: pgram_combined[signal_index], index: index)
+            var row_building_up = "\(index),"
+            
+            for signal_index in 0..<all_signals_for_csv.count {
+                var value: CGFloat? = safe_access(signal: all_signals_for_csv[signal_index], index: index)
                 
                 var should_add_comma = true
                 
-                if (signal_index == pgram_combined.count - 1) {
+                if (signal_index == all_signals_for_csv.count - 1) {
                     should_add_comma = false
                 }
                 
@@ -768,7 +777,6 @@ class CameraViewController: UIViewController {
                 }
             }
             
-//            var row = "\(index), \(RLeg_angle),\(LLeg_angle),\(yPosNose),\(RHipXPos),\(RHipYPos),\(LHipXPos),\(LHipYPos)\n";
 //
 //            if (index < pgram.count) {
 //                var pgram_val = pgram[index]
@@ -873,64 +881,103 @@ class CameraViewController: UIViewController {
     }
     
     //Determine number of squats
-    func determineNumberOfSquats(input: [CGFloat]) -> [Float] {
+    func generate_pgram(input: [CGFloat]) -> [Float] {
         
         //remove all NaN values from the array
-        var signal: [Float] = []
+        var time: [Double] = [] //[Array(0...(input.count-1)).map{Double($0)}]
+        var signal: [Double] = []
+        
+        var i: Double = 0.0
         
         for val in input {
             if (!val.isNaN) {
-                signal.append(Float(val))
+                signal.append(Double(val))
+                time.append(i)
             }
+            
+            i += 1
         }
         
         //linearly interpolate the NaN values to give constant ∆t = 1
         
-        //signal = linearly_interpolate(input_x: <#T##[Double]#>, input_y: <#T##[Double]#>)
+        signal = linearly_interpolate(input_x: time, input_y: signal)
+        
+        var interpolized_signal_float: [Float] = signal.map{Float($0)}
     
-        var fft_mat = Surge.pow(Surge.fft(signal), 2)
+        var pgram = dsp_operations_for_pgram(frameOfSamples: interpolized_signal_float)
         
-        var const_mult = 2.0/Double(signal.count)
-        
-        for var i in 0..<fft_mat.count {
-            fft_mat[i] = Float(const_mult) * fft_mat[i]
-        }
-        
-        var pgram = fft_mat
-        
-        
-
-        //now let's save the pgram to a CSV to we can inspect it in Python
-        
-//        let fileName = "pgram.csv";
-//        let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
+//        var fft_mat = Surge.pow(Surge.fft(signal), 2)
 //
-//        var csvBody = "Index, pgram\n";
+//        var const_mult = 2.0/Double(signal.count)
 //
-//        for var index in 0..<pgram.count {
-//
-//            let row = "\(index),\(pgram[index])\n";
-//
-//            csvBody.append(contentsOf: row);
+//        for var i in 0..<fft_mat.count {
+//            fft_mat[i] = Float(const_mult) * fft_mat[i]
 //        }
-//        do {
-//            try csvBody.write(to: path!, atomically: true, encoding: String.Encoding.utf8)
-//        } catch {
-//            print("Failed to create file");
-//            print("\(error)");
-//        }
-        
-        //display a popup giving the user options to send the CSV
-//        let vc = UIActivityViewController(activityItems: [path], applicationActivities: [])
-//        present(vc, animated: true, completion: nil)
         
         return pgram
+    }
+    
+    func dsp_operations_for_pgram(frameOfSamples: [Float]) -> [Float] {
+        
+        let frameCount = frameOfSamples.count
+        
+        let reals = UnsafeMutableBufferPointer<Float>.allocate(capacity: frameCount)
+        defer {reals.deallocate()}
+        let imags =  UnsafeMutableBufferPointer<Float>.allocate(capacity: frameCount)
+        defer {imags.deallocate()}
+        
+        _ = reals.initialize(from: frameOfSamples)
+        imags.initialize(repeating: 0.0)
+        
+        var complexBuffer = DSPSplitComplex(realp: reals.baseAddress!, imagp: imags.baseAddress!)
+        
+        let log2Size = Int(log2(Float(frameCount)))
+        
+        guard let fftSetup = vDSP_create_fftsetup(vDSP_Length(log2Size), FFTRadix(kFFTRadix2)) else {
+            return []
+        }
+        
+        defer {vDSP_destroy_fftsetup(fftSetup)}
+        
+        // Perform a forward FFT
+        vDSP_fft_zip(fftSetup, &complexBuffer, 1, vDSP_Length(log2Size), FFTDirection(FFT_FORWARD))
+        
+        
+        //    //transform realFloats to "traditional" periodogram
+        //    let array_exponentials = UnsafeMutablePointer<Float>.allocate(capacity: reals.count)
+        //    array_exponentials.initialize(to: 2.0)
+        //
+        //    var exp_output = UnsafeMutablePointer<Float>.allocate(capacity: reals.count)
+        //    var real_unsafe_pointer = UnsafePointer<Float>(Array(reals))
+        //
+        //
+        //    let unsafe_mutable_pointer_for_size = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
+        //    unsafe_mutable_pointer_for_size.initialize(to: Int32(reals.count))
+        //
+        //    let unsafe_pointer_for_size = UnsafePointer(unsafe_mutable_pointer_for_size)
+        //
+        //
+        //    vvpowf(exp_output, array_exponentials, real_unsafe_pointer, unsafe_pointer_for_size)
+        
+        
+        var realFloats = Array(reals)
+        var imaginaryFloats = Array(imags)
+        
+        var float_squared: [Float] = []
+        
+        var exponentials: [Float] = [Float](repeating: 2, count: realFloats.count)
+        var z = [Float](repeating: 0, count: realFloats.count)
+        var n = Int32(realFloats.count)
+        
+        vvpowf(&z, &exponentials, &realFloats, &n)
+        
+        return z.map{$0 * Float(Float(2.0)/Float(reals.count))}
     }
     
     func linearly_interpolate(input_x: [Double], input_y: [Double]) -> [Double]{
         
         var new_values = [Double](repeating: 0,
-                                  count: Int(input_x[input_x.count - 1]) + 1)
+                                  count: Int(input_x[input_x.count-1]) + 1)
         
         let stride = vDSP_Stride(1)
         
