@@ -22,7 +22,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 7
+    let timeIntervalToCapture = 3
     
     var isRecording = false
     var text_timeIntervalBeforeCaptureStart = "%d seconds to prepare"
@@ -727,8 +727,18 @@ class CameraViewController: UIViewController {
         var pgram_yPositionOfLhipSignal = generate_pgram(input: yPositionOfLHipSignal)
         
         
+        //to construct pgram of sum of all signals
+        var combined_signal: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
+                                          yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}]
+        var combined_signal_max_length = Int(combined_signal.map{$0.count}.max()!)
+        var biometric_all = total_sum_signals(input: combined_signal, length: combined_signal_max_length)
+        
+        
+        
         var all_signals_for_csv: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
-                                        yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal]
+                                        yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, biometric_all]
+        
+        
         
 
         //now let's write the signal to a CSV file and also export it by email
@@ -736,7 +746,7 @@ class CameraViewController: UIViewController {
         let fileName = "all_signals.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal\n";
+        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, pgram_biometric_all\n";
         
         
         //the filtered signal is SMALLER than the original signal
@@ -812,6 +822,33 @@ class CameraViewController: UIViewController {
         
         last_score += 10;
         return (last_score, "Well done!");
+    }
+    
+    func total_sum_signals(input: [[Float]], length: Int) -> [Float] {
+        var original: [[Float]] = input
+        var summed: [Float] = []
+        
+        //linearly interpolate all the signals
+        
+        for index in 0..<original.count {
+            var signal: [Float] = original[index]
+            
+            var interpolated = linearly_interpolate(input_x: Array(0...signal.count-1).map{Double($0)}, input_y: signal.map{Double($0)})
+
+            original[index] = interpolated.map{Float($0)}
+        }
+        
+        for index in 0..<original.count {
+            var value_sum: Float = 0
+            
+            for signal in original {
+                value_sum += signal[index]
+            }
+            
+            summed.append(value_sum)
+        }
+        
+        return summed
     }
     
     func safe_access(signal: [Float], index: Int) -> CGFloat? {
