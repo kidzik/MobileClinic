@@ -22,7 +22,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var captureButton: UIButton!
     
     let timeIntervalBeforeCaptureStart = 1
-    let timeIntervalToCapture = 3
+    let timeIntervalToCapture = 20
     
     var isRecording = false
     var text_timeIntervalBeforeCaptureStart = "%d seconds to prepare"
@@ -712,41 +712,59 @@ class CameraViewController: UIViewController {
         
         //var rightLegAngleSignal_interpolated = linearly_interpolate(input_x: Array(0...rightLegAngleSignal.count-1).map{Double($0)}, input_y: rightLegAngleSignal.map{Double($0)})
         
-        //^^ How to generate just the interpolation of a biometric signal
+        var rightLegAngleSignal_interpolated = linearly_interpolate(input: rightLegAngleSignal)
         
-        var pgram_rightLegAngleSignal = generate_pgram(input: rightLegAngleSignal)
+        var leftLegAngleSignal_interpolated = linearly_interpolate(input: leftLegAngleSignal)
         
-        var pgram_leftLegAngleSignal = generate_pgram(input: leftLegAngleSignal)
+        var yPositionOfNoseSignal_interpolated = linearly_interpolate(input: yPositionOfNoseSignal)
         
-        var pgram_yPositionOfNoseSignal = generate_pgram(input: yPositionOfNoseSignal)
+        var xPositionOfRHipSignal_interpolated = linearly_interpolate(input: xPositionOfRHipSignal)
         
-        var pgram_xPositionOfRHipSignal = generate_pgram(input: xPositionOfRHipSignal)
-        var pgram_yPositionOfRhipSignal = generate_pgram(input: yPositionOfRHipSignal)
+        var yPositionOfRhipSignal_interpolated = linearly_interpolate(input: yPositionOfRHipSignal)
         
-        var pgram_xPositionOfLHipSignal = generate_pgram(input: xPositionOfLHipSignal)
-        var pgram_yPositionOfLhipSignal = generate_pgram(input: yPositionOfLHipSignal)
+        var xPositionOfLHipSignal_interpolated = linearly_interpolate(input: xPositionOfLHipSignal)
+       
+        var yPositionOfLhipSignal_interpolated = linearly_interpolate(input: yPositionOfLHipSignal)
         
+        /**                  Interpolate & Compute Each Signal                        **/
         
+        var pgram_rightLegAngleSignal = compute_periodogram(frameOfSamples: rightLegAngleSignal_interpolated)
+        
+        var pgram_leftLegAngleSignal = compute_periodogram(frameOfSamples: leftLegAngleSignal_interpolated)
+        
+        var pgram_yPositionOfNoseSignal = compute_periodogram(frameOfSamples: yPositionOfNoseSignal_interpolated)
+        
+        var pgram_xPositionOfRHipSignal = compute_periodogram(frameOfSamples: xPositionOfRHipSignal_interpolated)
+       
+        var pgram_yPositionOfRhipSignal = compute_periodogram(frameOfSamples: yPositionOfRhipSignal_interpolated)
+
+        var pgram_xPositionOfLHipSignal = compute_periodogram(frameOfSamples: xPositionOfLHipSignal_interpolated)
+
+        var pgram_yPositionOfLhipSignal = compute_periodogram(frameOfSamples: yPositionOfLhipSignal_interpolated)
+
         //to construct pgram of sum of all signals
-        var combined_signal: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
-                                          yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}]
+        var combined_signal: [[Float]] = [rightLegAngleSignal_interpolated.map{Float($0)}, leftLegAngleSignal_interpolated.map{Float($0)},
+                                          yPositionOfNoseSignal_interpolated.map{Float($0)}, xPositionOfRHipSignal_interpolated.map{Float($0)}, yPositionOfRhipSignal_interpolated.map{Float($0)}, xPositionOfLHipSignal_interpolated.map{Float($0)}, yPositionOfLhipSignal_interpolated.map{Float($0)}]
         var combined_signal_max_length = Int(combined_signal.map{$0.count}.max()!)
-        var biometric_all = total_sum_signals(input: combined_signal, length: combined_signal_max_length)
+        var all = total_sum_signals(input: combined_signal, length: combined_signal_max_length)
         
         
         
         var all_signals_for_csv: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
-                                        yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, biometric_all]
+                                        yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal,
+                                        
+                                        all,
+                                        
+                                        rightLegAngleSignal_interpolated.map{Float($0)}, leftLegAngleSignal_interpolated.map{Float($0)},
+                                        yPositionOfNoseSignal_interpolated.map{Float($0)}, xPositionOfRHipSignal_interpolated.map{Float($0)}, yPositionOfRhipSignal_interpolated.map{Float($0)}, xPositionOfLHipSignal_interpolated.map{Float($0)}, yPositionOfLhipSignal_interpolated.map{Float($0)}]
         
         
-        
-
         //now let's write the signal to a CSV file and also export it by email
         
         let fileName = "all_signals.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, pgram_biometric_all\n";
+        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRHipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, pgram_all,rightLegAngleSignal_interpolated, leftLegAngleSignal_interpolated, yPositionOfNoseSignal_interpolated, xPositionOfRHipSignal_interpolated, yPositionOfRHipSignal_interpolated, xPositionOfLHipSignal_interpolated, yPositionOfLHipSignal_interpolated\n";
         
         
         //the filtered signal is SMALLER than the original signal
@@ -828,17 +846,10 @@ class CameraViewController: UIViewController {
         var original: [[Float]] = input
         var summed: [Float] = []
         
-        //linearly interpolate all the signals
+        var min_length_over_signals = Int(original.map{$0.count}.min()!)
         
-        for index in 0..<original.count {
-            var signal: [Float] = original[index]
-            
-            var interpolated = linearly_interpolate(input_x: Array(0...signal.count-1).map{Double($0)}, input_y: signal.map{Double($0)})
-
-            original[index] = interpolated.map{Float($0)}
-        }
         
-        for index in 0..<original.count {
+        for index in 0..<min_length_over_signals {
             var value_sum: Float = 0
             
             for signal in original {
@@ -918,7 +929,7 @@ class CameraViewController: UIViewController {
     }
     
     //Determine number of squats
-    func generate_pgram(input: [CGFloat]) -> [Float] {
+    func linearly_interpolate(input: [CGFloat]) -> [Float] {
         
         //remove all NaN values from the array
         var time: [Double] = [] //[Array(0...(input.count-1)).map{Double($0)}]
@@ -937,24 +948,23 @@ class CameraViewController: UIViewController {
         
         //linearly interpolate the NaN values to give constant ∆t = 1
         
-        signal = linearly_interpolate(input_x: time, input_y: signal)
+        var interpolated = [Double](repeating: 0,
+                                  count: Int(time[time.count-1]) + 1)
         
-        var interpolized_signal_float: [Float] = signal.map{Float($0)}
-    
-        var pgram = dsp_operations_for_pgram(frameOfSamples: interpolized_signal_float)
+        let stride = vDSP_Stride(1)
         
-//        var fft_mat = Surge.pow(Surge.fft(signal), 2)
-//
-//        var const_mult = 2.0/Double(signal.count)
-//
-//        for var i in 0..<fft_mat.count {
-//            fft_mat[i] = Float(const_mult) * fft_mat[i]
-//        }
+        vDSP_vgenpD(signal, stride,
+                    time, stride,
+                    &interpolated, stride,
+                    vDSP_Length(interpolated.count),
+                    vDSP_Length(signal.count))
         
-        return pgram
+        var interpolized_signal_float: [Float] = interpolated.map{Float($0)}
+        
+        return interpolized_signal_float
     }
     
-    func dsp_operations_for_pgram(frameOfSamples: [Float]) -> [Float] {
+    func compute_periodogram(frameOfSamples: [Float]) -> [Float] {
         
         let frameCount = frameOfSamples.count
         
