@@ -712,19 +712,19 @@ class CameraViewController: UIViewController {
         
         //var rightLegAngleSignal_interpolated = linearly_interpolate(input_x: Array(0...rightLegAngleSignal.count-1).map{Double($0)}, input_y: rightLegAngleSignal.map{Double($0)})
         
-        var rightLegAngleSignal_interpolated = linearly_interpolate(input: rightLegAngleSignal)
+        var rightLegAngleSignal_interpolated = normalize(signal: linearly_interpolate(input: rightLegAngleSignal))
         
-        var leftLegAngleSignal_interpolated = linearly_interpolate(input: leftLegAngleSignal)
+        var leftLegAngleSignal_interpolated = normalize(signal: linearly_interpolate(input: leftLegAngleSignal))
         
-        var yPositionOfNoseSignal_interpolated = linearly_interpolate(input: yPositionOfNoseSignal)
+        var yPositionOfNoseSignal_interpolated = normalize(signal: linearly_interpolate(input: yPositionOfNoseSignal))
         
-        var xPositionOfRHipSignal_interpolated = linearly_interpolate(input: xPositionOfRHipSignal)
+        var xPositionOfRHipSignal_interpolated = normalize(signal: linearly_interpolate(input: xPositionOfRHipSignal))
         
-        var yPositionOfRhipSignal_interpolated = linearly_interpolate(input: yPositionOfRHipSignal)
+        var yPositionOfRhipSignal_interpolated = normalize(signal: linearly_interpolate(input: yPositionOfRHipSignal))
         
-        var xPositionOfLHipSignal_interpolated = linearly_interpolate(input: xPositionOfLHipSignal)
+        var xPositionOfLHipSignal_interpolated = normalize(signal: linearly_interpolate(input: xPositionOfLHipSignal))
        
-        var yPositionOfLhipSignal_interpolated = linearly_interpolate(input: yPositionOfLHipSignal)
+        var yPositionOfLhipSignal_interpolated = normalize(signal: linearly_interpolate(input: yPositionOfLHipSignal))
         
         /**                  Interpolate & Compute Each Signal                        **/
         
@@ -748,12 +748,13 @@ class CameraViewController: UIViewController {
         var combined_signal_max_length = Int(combined_signal.map{$0.count}.max()!)
         var all = total_sum_signals(input: combined_signal, length: combined_signal_max_length)
         
-        
+        var periodogram_of_all = compute_periodogram(frameOfSamples: all)
+        var smoothed_periodogram_of_all = movingAverageFilter(filterWidth: 7, inputData: periodogram_of_all.map{CGFloat($0)}).map{Float($0)}
         
         var all_signals_for_csv: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
                                         yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal,
                                         
-                                        all,
+                                        smoothed_periodogram_of_all, all,
                                         
                                         rightLegAngleSignal_interpolated.map{Float($0)}, leftLegAngleSignal_interpolated.map{Float($0)},
                                         yPositionOfNoseSignal_interpolated.map{Float($0)}, xPositionOfRHipSignal_interpolated.map{Float($0)}, yPositionOfRhipSignal_interpolated.map{Float($0)}, xPositionOfLHipSignal_interpolated.map{Float($0)}, yPositionOfLhipSignal_interpolated.map{Float($0)}]
@@ -764,7 +765,7 @@ class CameraViewController: UIViewController {
         let fileName = "all_signals.csv";
         let path = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName);
         
-        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRHipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal, pgram_all,rightLegAngleSignal_interpolated, leftLegAngleSignal_interpolated, yPositionOfNoseSignal_interpolated, xPositionOfRHipSignal_interpolated, yPositionOfRHipSignal_interpolated, xPositionOfLHipSignal_interpolated, yPositionOfLHipSignal_interpolated\n";
+        var csvBody = "Index, rightLegAngleSignal, leftLegAngleSignal, yPositionOfNoseSignal, xPositionOfRHipSignal, yPositionOfRHipSignal, xPositionOfLHipSignal, yPositionOfLHipSignal, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRHipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLHipSignal, pgram_all, combined_signal, rightLegAngleSignal_interpolated, leftLegAngleSignal_interpolated, yPositionOfNoseSignal_interpolated, xPositionOfRHipSignal_interpolated, yPositionOfRHipSignal_interpolated, xPositionOfLHipSignal_interpolated, yPositionOfLHipSignal_interpolated\n";
         
         
         //the filtered signal is SMALLER than the original signal
@@ -860,6 +861,44 @@ class CameraViewController: UIViewController {
         }
         
         return summed
+    }
+    
+    func normalize(signal: [Float]) -> [Float] {
+        var input = signal
+        
+        var max = input.max()
+        
+        for i in 0..<input.count {
+            input[i] = input[i]/Float(max!)
+        }
+        
+        return input
+    }
+    
+    func determine_squats(periodogram: [Float]) -> Int{
+        
+        //remove the element at index 0 in case it is indefinite.
+        
+        var pgram = periodogram
+        
+        pgram.remove(at: 0)
+        
+        //find max
+        
+        var max = pgram.max()
+        var maxIdx = pgram.firstIndex(of: max!)!
+        
+        maxIdx += 1 // since we removed the first element.
+        
+        var frames = pgram.count
+        
+        var max_freq = maxIdx/frames
+        
+        var period = 1/max_freq
+        
+        var num_squats = frames/period
+        
+        return num_squats
     }
     
     func safe_access(signal: [Float], index: Int) -> CGFloat? {
