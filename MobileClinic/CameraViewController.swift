@@ -749,7 +749,19 @@ class CameraViewController: UIViewController {
         var all = total_sum_signals(input: combined_signal, length: combined_signal_max_length)
         
         var periodogram_of_all = compute_periodogram(frameOfSamples: all)
+        
         var smoothed_periodogram_of_all = movingAverageFilter(filterWidth: 7, inputData: periodogram_of_all.map{CGFloat($0)}).map{Float($0)}
+        
+        var signal = Array(smoothed_periodogram_of_all.prefix(Int(smoothed_periodogram_of_all.count/2)))
+        
+        let peakCoordinates = ThresholdingAlgo(y: signal.map{Double($0)}, lag: 5, threshold: 1, influence: 0.5)
+
+        var peakX = peakCoordinates.0
+        var peakY = peakCoordinates.1
+        
+        var squats = determine_squats(periodogram: signal.map{Double($0)}, peakX: peakX, peakY: peakY)
+        
+        print("Patient squatted \(squats) times")
         
         var all_signals_for_csv: [[Float]] = [rightLegAngleSignal.map{Float($0)}, leftLegAngleSignal.map{Float($0)},
                                         yPositionOfNoseSignal.map{Float($0)}, xPositionOfRHipSignal.map{Float($0)}, yPositionOfRHipSignal.map{Float($0)}, xPositionOfLHipSignal.map{Float($0)}, yPositionOfLHipSignal.map{Float($0)}, pgram_rightLegAngleSignal, pgram_leftLegAngleSignal, pgram_yPositionOfNoseSignal, pgram_xPositionOfRHipSignal, pgram_yPositionOfRhipSignal, pgram_xPositionOfLHipSignal, pgram_yPositionOfLhipSignal,
@@ -875,31 +887,27 @@ class CameraViewController: UIViewController {
         return input
     }
     
-    func determine_squats(periodogram: [Float]) -> Int{
+    func determine_squats(periodogram: [Double], peakX: [Int], peakY: [Double]) -> Double{
         
         //remove the element at index 0 in case it is indefinite.
         
+        var max = peakY.max()!
+        var maxIdx = peakX[peakY.index(of: max)!]
+        
+        
         var pgram = periodogram
-        
-        pgram.remove(at: 0)
-        
-        //find max
-        
-        var max = pgram.max()
-        var maxIdx = pgram.firstIndex(of: max!)!
-        
-        maxIdx += 1 // since we removed the first element.
         
         var frames = pgram.count
         
-        var max_freq = maxIdx/frames
+        var max_freq = Double(maxIdx)/Double(frames)
         
-        var period = 1/max_freq
+        var period = 1/Double(max_freq)
         
-        var num_squats = frames/period
+        var num_squats = Double(frames)/Double(period)
         
-        return num_squats
+        return num_squats.rounded()
     }
+    
     
     func safe_access(signal: [Float], index: Int) -> CGFloat? {
         if(index < signal.count && index > 0) {
@@ -1095,7 +1103,7 @@ class CameraViewController: UIViewController {
     }
     
     // Smooth z-score thresholding filter
-    func ThresholdingAlgo(y: [Double],lag: Int,threshold: Double,influence: Double) -> ([Int],[Double],[Double]) {
+    func ThresholdingAlgo(y: [Double],lag: Int,threshold: Double,influence: Double) -> ([Int], [Double]) {
         
         // Create arrays
         var signals   = Array(repeating: 0, count: y.count)
@@ -1131,7 +1139,18 @@ class CameraViewController: UIViewController {
             stdFilter[i] = standardDeviation(array: subArray(array: filteredY, s: i-lag, e: i))
         }
         
-        return (signals,avgFilter,stdFilter)
+        var peakIndexes: [Int] = []
+        var peakY: [Double] = []
+        
+        for index in 0..<y.count {
+            if(signals[index] == 1) {
+                peakIndexes.append(index)
+                peakY.append(y[index])
+            }
+        }
+        
+        //return (signals,avgFilter,stdFilter)
+        return (peakIndexes, peakY)
     }
     
     func showAlert(title: String, message: String, btnText: String, completion: @escaping () -> Void = {}) {
