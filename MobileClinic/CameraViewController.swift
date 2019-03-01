@@ -754,9 +754,17 @@ class CameraViewController: UIViewController {
         
         var signal = Array(smoothed_periodogram_of_all.prefix(Int(smoothed_periodogram_of_all.count/2)))
         
-        let peakCoordinates = ThresholdingAlgo(y: signal.map{Double($0)}, lag: 5, threshold: 1, influence: 0.5)
-
+//        let peakCoordinates = ThresholdingAlgo(y: signal.map{Double($0)}, lag: 5, threshold: 1, influence: 0.5)
+//
+//        var peakX = peakCoordinates.0
+//        var peakY = peakCoordinates.1
+        
+        //determine_squats(periodogram: signal.map{Double($0)}, peakX: peakX, peakY: peakY)
+        
+        var peakCoordinates = detect_peaks(y: signal.map{Double($0)})
+        
         var peakX = peakCoordinates.0
+        
         var peakY = peakCoordinates.1
         
         var squats = determine_squats(periodogram: signal.map{Double($0)}, peakX: peakX, peakY: peakY)
@@ -851,7 +859,8 @@ class CameraViewController: UIViewController {
         };
        
         
-        last_score += 10;
+        //last_score += 10;
+        last_score = Int(squats)
         return (last_score, "Well done!");
     }
     
@@ -894,7 +903,6 @@ class CameraViewController: UIViewController {
         var max = peakY.max()!
         var maxIdx = peakX[peakY.index(of: max)!]
         
-        
         var pgram = periodogram
         
         var frames = pgram.count
@@ -906,6 +914,22 @@ class CameraViewController: UIViewController {
         var num_squats = Double(frames)/Double(period)
         
         return num_squats.rounded()
+    }
+    
+    func detect_peaks(y: [Double]) -> ([Int], [Double]) {
+        //window of size 3
+        
+        var peakIndexes: [Int] = []
+        var peakY: [Double] = []
+        
+        for index in 1..<(y.count-1) {
+            if(y[index] > y[index-1] && y[index] > y[index+1]) {
+                //point is a peak
+                peakIndexes.append(index)
+                peakY.append(y[index])
+            }
+        }
+        return (peakIndexes, peakY)
     }
     
     
